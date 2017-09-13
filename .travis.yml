@@ -6,7 +6,7 @@ node_js:
   - "4"
   - "5"
   - "6"
-  - "8"
+ # - "8" - enable node 8 after fixing travis failure
 addons:
   apt:
     sources:
