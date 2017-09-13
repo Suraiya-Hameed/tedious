@@ -1,4 +1,4 @@
-0.0.24 09-13-2017
+0.0.25 09-13-2017
 -----------------
 - Added API to support default krbV5 client mechanism.
 
