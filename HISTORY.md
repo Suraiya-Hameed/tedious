@@ -1,3 +1,7 @@
+0.0.24 09-13-2017
+-----------------
+- Added API to support default krbV5 client mechanism.
+
 0.0.23 07-03-2017
 -----------------
 - SSPI implemented missing _sspi_FreeCredentialsHandle to correctly cleanup credentials allocation on call to destructor of the C++ instance.
