@@ -2,13 +2,13 @@
 
 const valueParse = require('../value-parser');
 
-module.exports = async function (parser, colMetadata, options, callback) {
+module.exports = async function(parser, colMetadata, options, callback) {
   const columns = options.useColumnNames ? {} : [];
 
   const len = colMetadata.length - 1;
 
-  let invokeParser = (columnMetaData, i) => {
-    return new Promise((resolve) => {
+  const invokeParser = (columnMetaData, i) => {
+    return new Promise((resolve, reject) => {
       valueParse(parser, columnMetaData, options, (value) => {
         const column = {
           value: value,
@@ -28,7 +28,7 @@ module.exports = async function (parser, colMetadata, options, callback) {
             name: 'ROW',
             event: 'row',
             columns: columns
-          })
+          });
         }
         resolve();
       });
@@ -36,7 +36,6 @@ module.exports = async function (parser, colMetadata, options, callback) {
   };
 
   for (let i = 0; i < colMetadata.length; i++) {
-    const columnMetaData = colMetadata[i];
     await invokeParser(colMetadata[i], i);
   }
 };

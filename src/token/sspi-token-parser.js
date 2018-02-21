@@ -20,20 +20,18 @@ function parseChallenge(buffer) {
 }
 
 module.exports = async function mainStart(parser, colMetadata, options, callback) {
-  return await resolveParser(parser, colMetadata, options, callback)
-}
+  return await resolveParser(parser, colMetadata, options, callback);
+};
 
 function resolveParser(parser, colMetadata, options, callback) {
   return new Promise((resolve, reject) => {
-    console.log('-----In Promise')
     parser.readUsVarByte((buffer) => {
-      console.log('-----resolving promise', buffer)
       resolve(callback({
         name: 'SSPICHALLENGE',
         event: 'sspichallenge',
         ntlmpacket: parseChallenge(buffer),
         ntlmpacketBuffer: buffer
-      }))
+      }));
     });
   });
-};
+}
