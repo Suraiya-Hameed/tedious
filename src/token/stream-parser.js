@@ -54,6 +54,7 @@ module.exports = class Parser extends Transform {
 
     if (this.suspended) {
       // Unsuspend and continue from where ever we left off.
+      console.log('Unsuspend and continue from where ever we left off.')
       this.suspended = false;
       this.next.call(null);
     }
@@ -65,7 +66,7 @@ module.exports = class Parser extends Transform {
     }
   }
 
-  parseTokens() {
+  async parseTokens() {
     const doneParsing = (token) => {
       if (token) {
         switch (token.name) {
@@ -81,14 +82,15 @@ module.exports = class Parser extends Transform {
       const type = this.buffer.readUInt8(this.position, true);
 
       this.position += 1;
-
-      if (tokenParsers[type]) {
+      if(type === TYPE.SSPI || type === TYPE.ROW){
+       await tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
+      } else if (tokenParsers[type]) {
         tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       } else {
         this.emit('error', new Error('Unknown type: ' + type));
       }
     }
-
+    
     if (!this.suspended && this.position === this.buffer.length) {
       // If we reached the end of the buffer, we can stop parsing now.
       return this.await.call(null);
