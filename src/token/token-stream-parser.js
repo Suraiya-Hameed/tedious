@@ -28,11 +28,16 @@ class Parser extends EventEmitter {
     this.parser.on('drain', () => {
       this.emit('drain');
     });
+    this.parser.on('checkIfLastPacket', ()=>{
+      this.emit('checkIfLastPacket');
+  })
   }
 
   // Returns false to apply backpressure.
   addBuffer(buffer) {
-    return this.parser.write(buffer);
+    this.parser.write(buffer);
+    console.log('Returning from write');
+    // return this.parser.write(buffer);
   }
 
   // Writes an end-of-message (EOM) marker into the parser transform input

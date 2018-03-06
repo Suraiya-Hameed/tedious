@@ -61,15 +61,37 @@ module.exports = class MessageIO extends EventEmitter {
 
     this.packetStream = new ReadablePacketStream();
     this.packetStream.on('data', (packet) => {
+      console.log('message-io received Data');
       this.logPacket('Received', packet);
-      this.emit('data', packet.data());
-      if (packet.isLast()) {
-        this.emit('message');
+
+      console.log('messageIO: done emitting data :', (this.asyncFlow));
+      if (this.asyncFlow) {
+        this.emit('data', { data: packet.data(), pkt: packet });
       }
+      else {
+        this.emit('data', packet.data());
+        if (packet.isLast()) {
+          console.log('messageIO: last packet emitting message')
+          this.emit('message');
+        }
+      }
+
+
     });
 
     this.socket.pipe(this.packetStream);
     this.packetDataSize = this._packetSize - packetHeaderLength;
+  }
+
+  setLogin7Flow(asyncFlow) {
+    this.asyncFlow = asyncFlow;
+  }
+
+  // used by async/await code to transition from 'data' to 'message' state
+  isCurrentBufferLastPacket(packet) {
+    if (packet.isLast()) {
+      this.emit('message');
+    }
   }
 
   packetSize(packetSize) {

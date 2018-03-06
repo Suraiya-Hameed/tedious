@@ -93,6 +93,7 @@ class Packet {
   }
 
   isLast() {
+    console.log('this ',this)
     return !!(this.buffer.readUInt8(OFFSET.Status) & STATUS.EOM);
   }
 

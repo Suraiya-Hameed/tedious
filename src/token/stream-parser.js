@@ -33,7 +33,7 @@ module.exports = class Parser extends Transform {
     this.next = undefined;
   }
 
-  _transform(input, encoding, done) {
+  async _transform(input, encoding, done) {
     if (input === this.endOfMessageMarker) {
       done(null, {                                         // generate endOfMessage pseudo token
         name: 'EOM',
@@ -61,11 +61,13 @@ module.exports = class Parser extends Transform {
     // If we're no longer suspended, parse new tokens
     if (!this.suspended) {
       // Start the parser
-      this.parseTokens();
+      await this.parseTokens();
     }
+    
+    console.log('exiting _transform')
   }
 
-  parseTokens() {
+  async parseTokens() {
     const doneParsing = (token) => {
       if (token) {
         switch (token.name) {
@@ -80,17 +82,27 @@ module.exports = class Parser extends Transform {
     while (!this.suspended && this.position + 1 <= this.buffer.length) {
       const type = this.buffer.readUInt8(this.position, true);
 
+      
       this.position += 1;
-
-      if (tokenParsers[type]) {
+      console.log('while type : ', type)
+      if (type == TYPE.ENVCHANGE) {
+        console.log('In type : ', TYPE.ENVCHANGE);
+        await tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
+      }
+      else if (tokenParsers[type]) {
+        // this.on('ParseNext', ()=>{console.log('Back from hellllll -1')})
+        // tokenParsers[type].on('ParseNext', ()=>{console.log('Back from hellllll')});
         tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       } else {
         this.emit('error', new Error('Unknown type: ' + type));
+        
       }
     }
-
+    console.log('Outside while loop');
     if (!this.suspended && this.position === this.buffer.length) {
       // If we reached the end of the buffer, we can stop parsing now.
+      console.log('Done stram-parser, calling await');
+      this.emit('checkIfLastPacket');
       return this.await.call(null);
     }
   }
@@ -353,5 +365,82 @@ module.exports = class Parser extends Transform {
     this.readUInt16LE((length) => {
       this.readBuffer(length, callback);
     });
+  }
+
+  //------------------------------------------------------------//
+  _readUInt16LE() {
+    return new Promise((resolve, reject) => {
+      const data = this.buffer.readUInt16LE(this.position);
+      this.position += 2;
+      resolve(data);
+    });
+    // this.awaitData(2, () => {
+    //   const data = this.buffer.readUInt16LE(this.position);
+    //   this.position += 2;
+    //   return data;
+    // });
+  }
+
+
+  _readUInt8() {
+    return new Promise((resolve, reject) => {
+      const data = this.buffer.readUInt8(this.position);
+      this.position += 1;
+      resolve(data);
+    })
+    // this.awaitData(1, () => {
+    //   const data = this.buffer.readUInt8(this.position);
+    //   this.position += 1;
+    //   callback(data);
+    // });
+  }
+
+  // Read a Unicode String (BVARCHAR)
+  async _readBVarChar(callback) {
+    let length = await this._readUInt8();
+    const data = await this._readBuffer(length * 2);
+    return data.toString('ucs2');
+
+    // this.readUInt8((length) => {
+    //   this.readBuffer(length * 2, (data) => {
+    //     callback(data.toString('ucs2'));
+    //   });
+    // });
+  }
+
+  // Read binary data (BVARBYTE)
+  async _readBVarByte(callback) {
+    let length = await this._readUInt8();
+    return await this._readBuffer(length);
+    // this.readUInt8((length) => {
+    //   this.readBuffer(length, callback);
+    // });
+  }
+
+  // Variable length data
+  _readBuffer(length) {
+    return new Promise((resolve, reject) => {
+      const data = this.buffer.slice(this.position, this.position + length);
+      this.position += length;
+      resolve(data);
+    });
+
+    // this.awaitData(length, () => {
+    //   const data = this.buffer.slice(this.position, this.position + length);
+    //   this.position += length;
+    //   callback(data);
+    // });
+  }
+
+
+
+  _awaitData(length, callback) {
+    if (this.position + length <= this.buffer.length) {
+      callback();
+    } else {
+      this.suspend(() => {
+        this.awaitData(length, callback);
+      });
+    }
   }
 };

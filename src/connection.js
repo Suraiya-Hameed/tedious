@@ -784,6 +784,10 @@ class Connection extends EventEmitter {
       // transform to the packet stream transform.
       this.messageIo.resume();
     });
+
+    this.tokenStreamParser.on('checkIfLastPacket', () => {
+      this.messageIo.isCurrentBufferLastPacket(this.state.events.contiueParser.pkt);
+    });
   }
 
   connect() {
@@ -1633,6 +1637,10 @@ Connection.prototype.STATE = {
   },
   SENT_LOGIN7_WITH_STANDARD_LOGIN: {
     name: 'SentLogin7WithStandardLogin',
+    enter: function() {
+      // remove this after all the response from SQL Server are parsed using async/await
+      this.messageIo.setLogin7Flow(true);
+    },
     events: {
       socketError: function() {
         this.transitionTo(this.STATE.FINAL);
@@ -1640,9 +1648,13 @@ Connection.prototype.STATE = {
       connectTimeout: function() {
         this.transitionTo(this.STATE.FINAL);
       },
-      data: function(data) {
-        this.sendDataToTokenStreamParser(data);
+      data: function(op) {
+        console.log('------- ', );
+        this.state.events.contiueParser.pkt = op.pkt;
+        this.sendDataToTokenStreamParser(op.data)
+        console.log('------- ', );
       },
+      contiueParser: {}/*function() {console.log('--contiueParser--contiueParser')}*/,
       loggedIn: function() {
         this.transitionTo(this.STATE.LOGGED_IN_SENDING_INITIAL_SQL);
       },
@@ -1653,6 +1665,10 @@ Connection.prototype.STATE = {
         this.transitionTo(this.STATE.FINAL);
       },
       message: function() {
+        
+        console.log('setLogin7Flow : reset: removing listener')
+        this.tokenStreamParser.removeAllListeners('checkIfLastPacket');
+        this.messageIo.setLogin7Flow(false);
         this.processLogin7Response();
       }
     }
