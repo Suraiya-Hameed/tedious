@@ -85,8 +85,9 @@ module.exports = class Parser extends Transform {
       
       this.position += 1;
       console.log('while type : ', type)
-      if (type == TYPE.ENVCHANGE) {
-        console.log('In type : ', TYPE.ENVCHANGE);
+      // if (type == TYPE.ENVCHANGE) {
+        if (type == TYPE.ROW) {
+        console.log('In type : ', TYPE.ROW);
         await tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       }
       else if (tokenParsers[type]) {
@@ -368,6 +369,33 @@ module.exports = class Parser extends Transform {
   }
 
   //------------------------------------------------------------//
+
+  _readInt32LE(callback) {
+   return new Promise((resolve, reject)=>{
+     const data = this.buffer.readUInt32LE(this.position);
+      this.position += 4;
+      resolve(data);
+   })
+    /*this.awaitData(4, () => {
+      const data = this.buffer.readInt32LE(this.position);
+      this.position += 4;
+      callback(data);
+    });*/
+  }
+
+  _readUInt32LE() {
+    return new Promise((resolve, reject)=>{
+      const data = this.buffer.readUInt32LE(this.position);
+      this.position += 4;
+      resolve(data);
+    })
+/*    this.awaitData(4, () => {
+      const data = this.buffer.readUInt32LE(this.position);
+      this.position += 4;
+      callback(data);
+    });*/
+  }
+
   _readUInt16LE() {
     return new Promise((resolve, reject) => {
       const data = this.buffer.readUInt16LE(this.position);
