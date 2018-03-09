@@ -55,15 +55,17 @@ module.exports = class Parser extends Transform {
     if (this.suspended) {
       // Unsuspend and continue from where ever we left off.
       this.suspended = false;
-      this.next.call(null);
+      console.log('calling the suspended method');
+      await this.next.call(null);
     }
 
-    // If we're no longer suspended, parse new tokens
-    if (!this.suspended) {
+    /*console.log('calling the parseTokens');
+    // If we're no longer suspended, parse new tokens*/
+    else if (!this.suspended) {
       // Start the parser
       await this.parseTokens();
     }
-    
+
     console.log('exiting _transform')
   }
 
@@ -82,11 +84,11 @@ module.exports = class Parser extends Transform {
     while (!this.suspended && this.position + 1 <= this.buffer.length) {
       const type = this.buffer.readUInt8(this.position, true);
 
-      
+
       this.position += 1;
       console.log('while type : ', type)
       // if (type == TYPE.ENVCHANGE) {
-        if (type == TYPE.ROW) {
+      if (type == TYPE.ROW) {
         console.log('In type : ', TYPE.ROW);
         await tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       }
@@ -96,7 +98,7 @@ module.exports = class Parser extends Transform {
         tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       } else {
         this.emit('error', new Error('Unknown type: ' + type));
-        
+
       }
     }
     console.log('Outside while loop');
@@ -371,11 +373,11 @@ module.exports = class Parser extends Transform {
   //------------------------------------------------------------//
 
   _readInt32LE(callback) {
-   return new Promise((resolve, reject)=>{
-     const data = this.buffer.readUInt32LE(this.position);
+    return new Promise((resolve, reject) => {
+      const data = this.buffer.readUInt32LE(this.position);
       this.position += 4;
       resolve(data);
-   })
+    })
     /*this.awaitData(4, () => {
       const data = this.buffer.readInt32LE(this.position);
       this.position += 4;
@@ -384,16 +386,16 @@ module.exports = class Parser extends Transform {
   }
 
   _readUInt32LE() {
-    return new Promise((resolve, reject)=>{
+    return new Promise((resolve, reject) => {
       const data = this.buffer.readUInt32LE(this.position);
       this.position += 4;
       resolve(data);
     })
-/*    this.awaitData(4, () => {
-      const data = this.buffer.readUInt32LE(this.position);
-      this.position += 4;
-      callback(data);
-    });*/
+    /*    this.awaitData(4, () => {
+          const data = this.buffer.readUInt32LE(this.position);
+          this.position += 4;
+          callback(data);
+        });*/
   }
 
   _readUInt16LE() {
@@ -444,15 +446,67 @@ module.exports = class Parser extends Transform {
     //   this.readBuffer(length, callback);
     // });
   }
+  /*
+    // Variable length data
+    _readBuffer(length) {
+      return new Promise((resolve, reject) => {
+        const data = this.buffer.slice(this.position, this.position + length);
+        this.position += length;
+        resolve(data);
+      });
+  
+      // this.awaitData(length, () => {
+      //   const data = this.buffer.slice(this.position, this.position + length);
+      //   this.position += length;
+      //   callback(data);
+      // });
+    }
+  */
 
-  // Variable length data
-  _readBuffer(length) {
-    return new Promise((resolve, reject) => {
-      const data = this.buffer.slice(this.position, this.position + length);
-      this.position += length;
-      resolve(data);
-    });
+   _awaitData(length) {
+      return new Promise((resolve, reject)=>{
+        if (this.position + length <= this.buffer.length) {
+          console.log('resolving awaited data 1');
+          resolve();
+      } else { 
+        this.suspend(() => {
+          console.log('resolving awaited data 2');
+        resolve(this._awaitData(length));
+      });
+      }    
+      })
+    // if (this.position + length <= this.buffer.length) {
+    //   callback();
+    // } else {
+    //   this.suspend(() => {
+    //     this.awaitData(length, callback);
+    //   });
+    // }
+  }
 
+/*  _awaitData(length, callback) {
+    if (this.position + length <= this.buffer.length) {
+      callback();
+    } else {
+      this.suspend(() => {
+        this.awaitData(length, callback);
+      });
+    }
+  }*/
+
+  async _readBuffer(length) {
+    const v = await this._awaitData(length);
+    const data = this.buffer.slice(this.position, this.position + length);
+    this.position += length;
+    console.log('Back to function that called await ', v);
+    return data;
+    /*
+     return new Promise((resolve, reject) => {
+       const data = this.buffer.slice(this.position, this.position + length);
+       this.position += length;
+       resolve(data);
+     });
+ */
     // this.awaitData(length, () => {
     //   const data = this.buffer.slice(this.position, this.position + length);
     //   this.position += length;
@@ -461,14 +515,12 @@ module.exports = class Parser extends Transform {
   }
 
 
+   
 
-  _awaitData(length, callback) {
-    if (this.position + length <= this.buffer.length) {
-      callback();
-    } else {
-      this.suspend(() => {
-        this.awaitData(length, callback);
-      });
-    }
-  }
+  // suspend(next) {
+  //   this.suspended = true;
+  //   this.next = next;
+  //   this.await.call(null);
+  // }
+
 };

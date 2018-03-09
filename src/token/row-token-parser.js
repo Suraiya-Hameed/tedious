@@ -122,7 +122,7 @@ module.exports = async function (parser, colMetadata, options, callback) {
     } else {
       columns.push(column);
     }
-    console.log(' value from within: ',value)
+    console.log('got value from within: '/*,value*/)
     if (i == len - 1) {
       return done();
     }
