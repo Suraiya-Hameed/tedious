@@ -55,18 +55,13 @@ module.exports = class Parser extends Transform {
     if (this.suspended) {
       // Unsuspend and continue from where ever we left off.
       this.suspended = false;
-      console.log('calling the suspended method');
       await this.next.call(null);
     }
-
-    /*console.log('calling the parseTokens');
     // If we're no longer suspended, parse new tokens*/
     else if (!this.suspended) {
       // Start the parser
       await this.parseTokens();
     }
-
-    console.log('exiting _transform')
   }
 
   async parseTokens() {
@@ -84,27 +79,19 @@ module.exports = class Parser extends Transform {
     while (!this.suspended && this.position + 1 <= this.buffer.length) {
       const type = this.buffer.readUInt8(this.position, true);
 
-
       this.position += 1;
-      console.log('while type : ', type)
-      // if (type == TYPE.ENVCHANGE) {
       if (type == TYPE.ROW) {
-        console.log('In type : ', TYPE.ROW);
         await tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       }
       else if (tokenParsers[type]) {
-        // this.on('ParseNext', ()=>{console.log('Back from hellllll -1')})
-        // tokenParsers[type].on('ParseNext', ()=>{console.log('Back from hellllll')});
         tokenParsers[type](this, this.colMetadata, this.options, doneParsing);
       } else {
         this.emit('error', new Error('Unknown type: ' + type));
-
       }
     }
-    console.log('Outside while loop');
+
     if (!this.suspended && this.position === this.buffer.length) {
       // If we reached the end of the buffer, we can stop parsing now.
-      console.log('Done stram-parser, calling await');
       this.emit('checkIfLastPacket');
       return this.await.call(null);
     }
@@ -372,57 +359,32 @@ module.exports = class Parser extends Transform {
 
   //------------------------------------------------------------//
 
-  _readInt32LE(callback) {
-    return new Promise((resolve, reject) => {
-      const data = this.buffer.readUInt32LE(this.position);
-      this.position += 4;
-      resolve(data);
-    })
-    /*this.awaitData(4, () => {
-      const data = this.buffer.readInt32LE(this.position);
-      this.position += 4;
-      callback(data);
-    });*/
+  async _readInt32LE(callback) {
+    await this._awaitData(4);
+    const data = this.buffer.readUInt32LE(this.position);
+    this.position += 4;
+    return data;
   }
 
-  _readUInt32LE() {
-    return new Promise((resolve, reject) => {
-      const data = this.buffer.readUInt32LE(this.position);
-      this.position += 4;
-      resolve(data);
-    })
-    /*    this.awaitData(4, () => {
-          const data = this.buffer.readUInt32LE(this.position);
-          this.position += 4;
-          callback(data);
-        });*/
+  async _readUInt32LE() {
+    await this._awaitData(4);
+    const data = this.buffer.readUInt32LE(this.position);
+    this.position += 4;
+    return data;
   }
 
-  _readUInt16LE() {
-    return new Promise((resolve, reject) => {
-      const data = this.buffer.readUInt16LE(this.position);
-      this.position += 2;
-      resolve(data);
-    });
-    // this.awaitData(2, () => {
-    //   const data = this.buffer.readUInt16LE(this.position);
-    //   this.position += 2;
-    //   return data;
-    // });
+  async _readUInt16LE() {
+    await this._awaitData(2);
+    const data = this.buffer.readUInt16LE(this.position);
+    this.position += 2;
+    return data;
   }
 
-
-  _readUInt8() {
-    return new Promise((resolve, reject) => {
-      const data = this.buffer.readUInt8(this.position);
-      this.position += 1;
-      resolve(data);
-    })
-    // this.awaitData(1, () => {
-    //   const data = this.buffer.readUInt8(this.position);
-    //   this.position += 1;
-    //   callback(data);
-    // });
+  async _readUInt8() {
+    await this._awaitData(1);
+    const data = this.buffer.readUInt8(this.position);
+    this.position += 1;
+    return data;
   }
 
   // Read a Unicode String (BVARCHAR)
@@ -430,97 +392,30 @@ module.exports = class Parser extends Transform {
     let length = await this._readUInt8();
     const data = await this._readBuffer(length * 2);
     return data.toString('ucs2');
-
-    // this.readUInt8((length) => {
-    //   this.readBuffer(length * 2, (data) => {
-    //     callback(data.toString('ucs2'));
-    //   });
-    // });
   }
 
   // Read binary data (BVARBYTE)
   async _readBVarByte(callback) {
     let length = await this._readUInt8();
     return await this._readBuffer(length);
-    // this.readUInt8((length) => {
-    //   this.readBuffer(length, callback);
-    // });
   }
-  /*
-    // Variable length data
-    _readBuffer(length) {
-      return new Promise((resolve, reject) => {
-        const data = this.buffer.slice(this.position, this.position + length);
-        this.position += length;
-        resolve(data);
-      });
-  
-      // this.awaitData(length, () => {
-      //   const data = this.buffer.slice(this.position, this.position + length);
-      //   this.position += length;
-      //   callback(data);
-      // });
-    }
-  */
-
-   _awaitData(length) {
-      return new Promise((resolve, reject)=>{
-        if (this.position + length <= this.buffer.length) {
-          console.log('resolving awaited data 1');
-          resolve();
-      } else { 
-        this.suspend(() => {
-          console.log('resolving awaited data 2');
-        resolve(this._awaitData(length));
-      });
-      }    
-      })
-    // if (this.position + length <= this.buffer.length) {
-    //   callback();
-    // } else {
-    //   this.suspend(() => {
-    //     this.awaitData(length, callback);
-    //   });
-    // }
-  }
-
-/*  _awaitData(length, callback) {
-    if (this.position + length <= this.buffer.length) {
-      callback();
-    } else {
-      this.suspend(() => {
-        this.awaitData(length, callback);
-      });
-    }
-  }*/
 
   async _readBuffer(length) {
-    const v = await this._awaitData(length);
+    await this._awaitData(length);
     const data = this.buffer.slice(this.position, this.position + length);
     this.position += length;
-    console.log('Back to function that called await ', v);
     return data;
-    /*
-     return new Promise((resolve, reject) => {
-       const data = this.buffer.slice(this.position, this.position + length);
-       this.position += length;
-       resolve(data);
-     });
- */
-    // this.awaitData(length, () => {
-    //   const data = this.buffer.slice(this.position, this.position + length);
-    //   this.position += length;
-    //   callback(data);
-    // });
   }
 
-
-   
-
-  // suspend(next) {
-  //   this.suspended = true;
-  //   this.next = next;
-  //   this.await.call(null);
-  // }
-
+  _awaitData(length) {
+    return new Promise((resolve, reject) => {
+      if (this.position + length <= this.buffer.length) {
+        resolve();
+      } else {
+        this.suspend(() => {
+          resolve(this._awaitData(length));
+        });
+      }
+    })
+  }
 };

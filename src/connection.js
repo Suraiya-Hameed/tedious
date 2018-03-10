@@ -784,10 +784,6 @@ class Connection extends EventEmitter {
       // transform to the packet stream transform.
       this.messageIo.resume();
     });
-
-    // this.tokenStreamParser.on('checkIfLastPacket', () => {
-    //   this.messageIo.isCurrentBufferLastPacket(this.state.events.contiueParser.pkt);
-    // });
   }
 
   connect() {
@@ -1637,13 +1633,6 @@ Connection.prototype.STATE = {
   },
   SENT_LOGIN7_WITH_STANDARD_LOGIN: {
     name: 'SentLogin7WithStandardLogin',
-/*    enter: function() {
-      // remove this after all the response from SQL Server are parsed using async/await
-      this.messageIo.setLogin7Flow(true);
-      this.tokenStreamParser.on('checkIfLastPacket', () => {
-        this.messageIo.isCurrentBufferLastPacket(this.state.events.contiueParser.pkt);
-      });
-    },*/
     events: {
       socketError: function() {
         this.transitionTo(this.STATE.FINAL);
@@ -1652,15 +1641,8 @@ Connection.prototype.STATE = {
         this.transitionTo(this.STATE.FINAL);
       },
       data: function(data) {
-        this.sendDataToTokenStreamParser(data)
+        this.sendDataToTokenStreamParser(data);
       },
-      /*data: function(op) {
-        console.log('------- ', );
-        this.state.events.contiueParser.pkt = op.pkt;
-        this.sendDataToTokenStreamParser(op.data)
-        console.log('------- ', );
-      },
-      contiueParser: {},*/
       loggedIn: function() {
         this.transitionTo(this.STATE.LOGGED_IN_SENDING_INITIAL_SQL);
       },
@@ -1671,9 +1653,6 @@ Connection.prototype.STATE = {
         this.transitionTo(this.STATE.FINAL);
       },
       message: function() {
-        // console.log('setLogin7Flow : reset: removing listener')
-        // this.tokenStreamParser.removeAllListeners('checkIfLastPacket');
-        // this.messageIo.setLogin7Flow(false);
         this.processLogin7Response();
       }
     }
@@ -1756,11 +1735,10 @@ Connection.prototype.STATE = {
   SENT_CLIENT_REQUEST: {
     name: 'SentClientRequest',
     enter: function () {
-      // remove this after all the response from SQL Server are parsed using async/await
-      console.log('Entering SentClientRequest ')
-      this.messageIo.setLogin7Flow(true);
+      // TODO: remove 'enter' function after all response from SQL Server are parsed using async/await
+      this.messageIo.setAsyncAwaitFlow(true);
       this.tokenStreamParser.on('checkIfLastPacket', () => {
-        this.messageIo.isCurrentBufferLastPacket(this.state.events.contiueParser.pkt);
+        this.messageIo.isLastPacket(this.state.events.packet);
       });
     },
     exit: function(nextState) {
@@ -1777,31 +1755,20 @@ Connection.prototype.STATE = {
         sqlRequest.callback(err);
         this.transitionTo(this.STATE.FINAL);
       },
-      /*data: function(data) {
+      data: function(packet) {
         this.clearRequestTimer();                          // request timer is stopped on first data package
-        const ret = this.sendDataToTokenStreamParser(data);
-        if (ret === false) {
-          // Bridge backpressure from the token stream parser transform to the
-          // packet stream transform.
-          this.messageIo.pause();
-        }
-      },*/
-      data: function(op) {
-        this.clearRequestTimer();                          // request timer is stopped on first data package
-        const ret = this.sendDataToTokenStreamParser(op.data);
-        this.state.events.contiueParser.pkt = op.pkt;
+        const ret = this.sendDataToTokenStreamParser(packet.data());
+        // after parsing the data, this stored `packet` is used to check if it is the last packet.
+        this.state.events.packet = packet;
         if (ret === false) {
           // Bridge backpressure from the token stream parser transform to the
           // packet stream transform.
           this.messageIo.pause();
         }
       },
-      contiueParser: {},
       message: function() {
-
-        console.log('setLogin7Flow : reset: removing listener')
         this.tokenStreamParser.removeAllListeners('checkIfLastPacket');
-        this.messageIo.setLogin7Flow(false);
+        this.messageIo.setAsyncAwaitFlow(false);
 
         // We have to channel the 'message' (EOM) event through the token stream
         // parser transform, to keep it in line with the flow of the tokens, when
