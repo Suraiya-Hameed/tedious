@@ -96,7 +96,6 @@ async function _valueParse(parser, metaData, options) {
 
     case 'BigInt':
       let buffer = await parser._readBuffer(8);
-      console.log('In BigInt:convertLEBytesToString ', buffer)
       return convertLEBytesToString(buffer)
 
     case 'IntN':
@@ -111,7 +110,6 @@ async function _valueParse(parser, metaData, options) {
           return parser._readInt32LE();
         case 8:
           let buffer = parser._readBuffer(8);
-          console.log('In IntN:convertLEBytesToString :', buffer)
           // should convert convertLEBytesToString to async too - doesn't work on bigint yet
           return convertLEBytesToString(buffer);
 
