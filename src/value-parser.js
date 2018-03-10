@@ -96,22 +96,22 @@ async function _valueParse(parser, metaData, options) {
 
     case 'BigInt':
       let buffer = await parser._readBuffer(8);
-      return convertLEBytesToString(buffer)
+      return await convertLEBytesToString(buffer)
 
     case 'IntN':
       switch (dataLength) {
         case 0:
           return null;
         case 1:
-          return parser._readUInt8();
+          return await parser._readUInt8();
         case 2:
-          return parser._readInt16LE();
+          return await parser._readInt16LE();
         case 4:
-          return parser._readInt32LE();
+          return await parser._readInt32LE();
         case 8:
-          let buffer = parser._readBuffer(8);
+          let buffer = await parser._readBuffer(8);
           // should convert convertLEBytesToString to async too - doesn't work on bigint yet
-          return convertLEBytesToString(buffer);
+          return await convertLEBytesToString(buffer);
 
         default:
           return parser.emit('error', new Error('Unsupported dataLength ' + dataLength + ' for IntN'));
