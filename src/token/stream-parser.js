@@ -389,14 +389,14 @@ module.exports = class Parser extends Transform {
 
   // Read a Unicode String (BVARCHAR)
   async _readBVarChar(callback) {
-    let length = await this._readUInt8();
+    const length = await this._readUInt8();
     const data = await this._readBuffer(length * 2);
     return data.toString('ucs2');
   }
 
   // Read binary data (BVARBYTE)
   async _readBVarByte(callback) {
-    let length = await this._readUInt8();
+    const length = await this._readUInt8();
     return await this._readBuffer(length);
   }
 
@@ -416,6 +416,6 @@ module.exports = class Parser extends Transform {
           resolve(this._awaitData(length));
         });
       }
-    })
+    });
   }
 };

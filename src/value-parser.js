@@ -18,7 +18,7 @@ const DEFAULT_ENCODING = 'utf8';
 
 async function _readTextPointerNull(parser, type) {
   if (type.hasTextPointerAndTimestamp) {
-    let textPointerLength = await parser._readUInt8();
+    const textPointerLength = await parser._readUInt8();
     if (textPointerLength !== 0) {
       // Appear to be dummy values, so consume and discard them.
       await parser._readBuffer(textPointerLength);
@@ -79,8 +79,8 @@ module.exports = _valueParse;
 // prototyping for just int and varchar types
 async function _valueParse(parser, metaData, options) {
   const type = metaData.type;
-  let textPointerNull = await _readTextPointerNull(parser, type);
-  let dataLength = await _readDataLength(parser, type, metaData, textPointerNull);
+  const textPointerNull = await _readTextPointerNull(parser, type);
+  const dataLength = await _readDataLength(parser, type, metaData, textPointerNull);
   switch (type.name) {
     case 'Null':
       return null;
@@ -95,8 +95,8 @@ async function _valueParse(parser, metaData, options) {
       return await parser._readInt16LE();
 
     case 'BigInt':
-      let buffer = await parser._readBuffer(8);
-      return await convertLEBytesToString(buffer)
+      const buffer = await parser._readBuffer(8);
+      return await convertLEBytesToString(buffer);
 
     case 'IntN':
       switch (dataLength) {
@@ -109,13 +109,13 @@ async function _valueParse(parser, metaData, options) {
         case 4:
           return await parser._readInt32LE();
         case 8:
-          let buffer = await parser._readBuffer(8);
+          const buffer = await parser._readBuffer(8);
           // should convert convertLEBytesToString to async too - doesn't work on bigint yet
           return await convertLEBytesToString(buffer);
 
         default:
           return parser.emit('error', new Error('Unsupported dataLength ' + dataLength + ' for IntN'));
-      };
+      }
 
     case 'VarChar':
     case 'Char':
@@ -148,8 +148,8 @@ async function _readChars(parser, dataLength, codepage, nullValue) {
   if (dataLength === nullValue) {
     return null;
   } else {
-    let data = await parser._readBuffer(dataLength);
-    return iconv.decode(data, codepage)
+    const data = await parser._readBuffer(dataLength);
+    return iconv.decode(data, codepage);
   }
 }
 
@@ -167,17 +167,18 @@ function readMaxBinary(parser, callback) {
   return readMax(parser, callback);
 }
 
-async function _readMaxChars(parser, codepage) {
+function readMaxChars(parser, codepage, callback) {
   if (codepage == null) {
     codepage = DEFAULT_ENCODING;
   }
 
-  let data = await _readMax(parser);
-  if (data) {
-      return iconv.decode(data, codepage);
+  readMax(parser, (data) => {
+    if (data) {
+      callback(iconv.decode(data, codepage));
     } else {
-      return null;
+      callback(null);
     }
+  });
 }
 
 function readMaxNChars(parser, callback) {

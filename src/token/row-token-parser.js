@@ -2,22 +2,22 @@
 
 const valueParse = require('../value-parser');
 
-module.exports = async function (parser, colMetadata, options, callback) {
+module.exports = async function(parser, colMetadata, options, callback) {
   const columns = options.useColumnNames ? {} : [];
 
   const len = colMetadata.length;
 
-  let done = () => {
+  const done = () => {
     callback({
       name: 'ROW',
       event: 'row',
       columns: columns
     });
-  }
+  };
 
   for (let i = 0; i < len; i++) {
     const columnMetaData = colMetadata[i];
-    let value = await valueParse(parser, columnMetaData, options);
+    const value = await valueParse(parser, columnMetaData, options);
 
     const column = {
       value: value,

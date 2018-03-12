@@ -1734,7 +1734,7 @@ Connection.prototype.STATE = {
   },
   SENT_CLIENT_REQUEST: {
     name: 'SentClientRequest',
-    enter: function () {
+    enter: function() {
       // TODO: remove 'enter' function after all response from SQL Server are parsed using async/await
       this.messageIo.setAsyncAwaitFlow(true);
       this.tokenStreamParser.on('checkIfLastPacket', () => {

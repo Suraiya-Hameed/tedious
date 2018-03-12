@@ -30,7 +30,7 @@ class Parser extends EventEmitter {
     });
     this.parser.on('checkIfLastPacket', () => {
       this.emit('checkIfLastPacket');
-    })
+    });
   }
 
   // Returns false to apply backpressure.
