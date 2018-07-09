@@ -23,6 +23,7 @@ exports.insertBinary = function(test) {
     test.done();
   });
 
+  connection.on('debug', (log) => console.log('-- ', log));
   connection.on('connect', function(err) {
     test.ifError(err);
 
