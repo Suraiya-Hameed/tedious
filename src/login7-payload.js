@@ -239,6 +239,8 @@ module.exports.Login7Payload = class Login7Payload {
     }
 
     if (this.fedAuthLogin7Required) {
+      console.log('writing at offset ', extensionPos);
+      console.log('writing at position ', variableData.data.position);
       variableData.data.writeUInt32LEatOffset(variableData.offset, extensionPos);
       return Buffer.concat([variableData.offsetsAndLengths.data, variableData.data.data, this.featureExt ]);
     }
@@ -276,8 +278,10 @@ module.exports.Login7Payload = class Login7Payload {
   addVariableDataInt32LE(variableData, value) {
     variableData.offsetsAndLengths.writeUInt16LE(variableData.offset);
     variableData.offsetsAndLengths.writeUInt16LE(4);
+    console.log('Pos :', variableData.offsetsAndLengths.position);
     // position at which the int value is written
     const position = variableData.data.getPos();
+    console.log('position :', variableData.offsetsAndLengths.position, ' | ', position);
     variableData.data.writeUInt32LE(value);
     variableData.offset += 4;
     return position;
