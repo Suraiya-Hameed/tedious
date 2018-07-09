@@ -90,7 +90,7 @@ jobs:
             "options": {
               "database": "test",
               "encrypt": true,
-              "authentication": "ActiveDirectoryPassword"
+              "authentication": "SqlPassword"
             }
           }
         }' > ~/.tedious/test-connection.json

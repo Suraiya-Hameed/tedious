@@ -9,7 +9,7 @@ const config = JSON.parse(
 
 config.options.debug = {
   packet: true,
-  data: true,
+  // data: true,
   payload: true,
   token: true,
   log: true
