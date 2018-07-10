@@ -273,9 +273,9 @@ module.exports.Login7Payload = class Login7Payload {
     value || (value = '');
     variableData.offsetsAndLengths.writeUInt16LE(variableData.offset);
     variableData.offsetsAndLengths.writeUInt16LE(value.length);
-    console.log('variableData.data adding string ', variableData.data.position);
+    console.log('in variableData.data adding string ', variableData.data.position);
     variableData.data.writeString(value);
-    console.log('variableData.data adding string ', variableData.data.position);
+    console.log('out variableData.data adding string ', variableData.data.position);
     return variableData.offset += value.length * 2;
   }
 
