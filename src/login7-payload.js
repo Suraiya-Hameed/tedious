@@ -205,7 +205,6 @@ module.exports.Login7Payload = class Login7Payload {
     this.addVariableDataString(variableData, this.loginData.serverName);
     let extensionPos = undefined;
     console.log('Pos fedAuthLogin7Required:', variableData.data.position);
-    this.fedAuthLogin7Required = false;
     if (this.fedAuthLogin7Required) {
       // hold the position at which the FeaturExt offset is going to be written. We write 0 in the placeholder till the offset is available.
       extensionPos = this.addVariableDataInt32LE(variableData, 0);
@@ -285,7 +284,7 @@ module.exports.Login7Payload = class Login7Payload {
     variableData.offsetsAndLengths.writeUInt16LE(4);
     console.log('Pos :', variableData.data.position, '|value ', value);
     // position at which the int value is written
-    const position = variableData.data.getPos();
+    const position = variableData.data.position;
     console.log('position :', variableData.offsetsAndLengths.position, ' | ', position, ' | ', variableData.data.position);
     variableData.data.writeUInt32LE(value);
     console.log('Pos :', variableData.data.position);
