@@ -279,11 +279,12 @@ module.exports.Login7Payload = class Login7Payload {
   addVariableDataInt32LE(variableData, value) {
     variableData.offsetsAndLengths.writeUInt16LE(variableData.offset);
     variableData.offsetsAndLengths.writeUInt16LE(4);
-    console.log('Pos :', variableData.data.position);
+    console.log('Pos :', variableData.data.position, '|value ', value);
     // position at which the int value is written
     const position = variableData.data.getPos();
     console.log('position :', variableData.offsetsAndLengths.position, ' | ', position, ' | ', variableData.data.position);
     variableData.data.writeUInt32LE(value);
+    console.log('Pos :', variableData.data.position);
     variableData.offset += 4;
     return position;
   }
