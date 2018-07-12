@@ -284,7 +284,8 @@ module.exports.Login7Payload = class Login7Payload {
     variableData.offsetsAndLengths.writeUInt16LE(4);
     console.log('Pos :', variableData.data.position, '|value ', value);
     // position at which the int value is written
-    const position = variableData.data.position;
+    // const position = variableData.data.position;
+    const position = variableData.data.getPos();
     console.log('position :', variableData.offsetsAndLengths.position, ' | ', position, ' | ', variableData.data.position);
     variableData.data.writeUInt32LE(value);
     console.log('Pos :', variableData.data.position);
