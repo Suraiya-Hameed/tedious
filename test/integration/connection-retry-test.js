@@ -35,14 +35,17 @@ exports['connection retry tests'] = {
     const connection = new Connection(config);
 
     connection.on('retry', () => {
+      console.log('retry');
       test.ok(true);
     });
 
     connection.on('connect', (err) => {
+      console.log('connect');
       test.ok(err);
     });
 
     connection.on('end', (info) => {
+      console.log('done');
       test.done();
     });
   },
@@ -58,6 +61,7 @@ exports['connection retry tests'] = {
     const connection = new Connection(config);
 
     connection.on('retry', () => {
+      console.log('retry');
       test.ok(false);
     });
 
@@ -66,6 +70,7 @@ exports['connection retry tests'] = {
     });
 
     connection.on('end', (info) => {
+      console.log('end');
       test.done();
     });
   },
@@ -85,6 +90,7 @@ exports['connection retry tests'] = {
     const connection = new Connection(config);
 
     connection.on('retry', () => {
+      console.log('retry');
       test.ok(false);
     });
 
@@ -98,6 +104,7 @@ exports['connection retry tests'] = {
     });
 
     connection.on('end', (info) => {
+      console.log('end');
       clock.restore();
       test.done();
     });
