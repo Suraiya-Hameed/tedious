@@ -203,11 +203,11 @@ module.exports.Login7Payload = class Login7Payload {
     this.addVariableDataBuffer(variableData, (this.loginData.domain || this.fedAuthLogin7Required) ? Buffer.alloc(0) : this.createPasswordBuffer());
     this.addVariableDataString(variableData, this.loginData.appName);
     this.addVariableDataString(variableData, this.loginData.serverName);
-    let extensionPos = undefined;
+    let extensionPosObj = {};
     console.log('Pos fedAuthLogin7Required:', variableData.data.position);
     if (this.fedAuthLogin7Required) {
       // hold the position at which the FeaturExt offset is going to be written. We write 0 in the placeholder till the offset is available.
-      extensionPos = this.addVariableDataInt32LE(variableData, 0);
+      extensionPosObj = this.addVariableDataInt32LE(variableData, 0);
     } else {
       this.addVariableDataString(variableData, '');
     }
@@ -241,9 +241,9 @@ module.exports.Login7Payload = class Login7Payload {
     }
 
     if (this.fedAuthLogin7Required) {
-      console.log('writing offset ', extensionPos);
+      console.log('writing offset ', extensionPosObj);
       console.log('writing at position ', variableData.data.position);
-      variableData.data.writeUInt32LEatOffset(variableData.offset, extensionPos);
+      variableData.data.writeUInt32LEatOffset(variableData.offset, extensionPosObj);
       return Buffer.concat([variableData.offsetsAndLengths.data, variableData.data.data, this.featureExt ]);
     }
 
@@ -285,12 +285,12 @@ module.exports.Login7Payload = class Login7Payload {
     console.log('Pos :', variableData.data.position, '|value ', value);
     // position at which the int value is written
     // const position = variableData.data.position;
-    const position = variableData.data.getPos();
-    console.log('position :', variableData.offsetsAndLengths.position, ' | ', position, ' | ', variableData.data.position);
+    const positionObj = variableData.data.getPos();
+    console.log('position :', variableData.offsetsAndLengths.position/* , ' | ', position, ' | ', variableData.data.position */);
     variableData.data.writeUInt32LE(value);
     console.log('Pos :', variableData.data.position);
     variableData.offset += 4;
-    return position;
+    return positionObj;
   }
   createNTLMRequest(options) {
     const domain = escape(options.domain.toUpperCase());

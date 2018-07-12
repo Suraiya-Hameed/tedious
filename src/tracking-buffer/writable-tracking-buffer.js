@@ -82,20 +82,39 @@ module.exports = class WritableTrackingBuffer {
     this.position += length;
   }
 
-  writeUInt32LEatOffset(value: number, offset: number) {
-    if (offset < this.compositeBuffer.length) {
-      console.log('writeUInt32LEatOffset: compositeBuffer len  ' + this.compositeBuffer.length);
-      this.compositeBuffer.writeUInt32LE(value, offset);
+  writeUInt32LEatOffset(value: number, offsetObj) {
+
+    if (this.compositeBuffer.length === 0) {
+      console.log('condition 1');
+      this.buffer.writeUInt32LE(value, offsetObj.offset);
+    } else if (offsetObj.compositeBufferLen === 0 && this.compositeBuffer.length !== 0) {
+      console.log('condition 2');
+      this.compositeBuffer.writeUInt32LE(value, offsetObj.offset);
+    } else if ((offsetObj.compositeBufferLen + offsetObj.offset) < this.compositeBuffer.length) {
+      console.log('condition 3');
+      this.compositeBuffer.writeUInt32LE(value, offsetObj.compositeBufferLen + offsetObj.offset);
     }
-    else {
-      console.log('writeUInt32LEatOffset: buffer len  ' + this.buffer.length);
-      this.buffer.writeUInt32LE(value, offset);
+    else if ((offsetObj.compositeBufferLen + offsetObj.offset) > this.compositeBuffer.length) {
+      console.log('condition 4');
+      this.compositeBuffer.writeUInt32LE(value, offsetObj.offset);
     }
+    // if (offset < this.compositeBuffer.length) {
+    //   console.log('writeUInt32LEatOffset: compositeBuffer len  ' + this.compositeBuffer.length);
+    //   this.compositeBuffer.writeUInt32LE(value, offset);
+    // }
+    // else {
+    //   console.log('writeUInt32LEatOffset: buffer len  ' + this.buffer.length);
+    //   this.buffer.writeUInt32LE(value, offset);
+    // }
   }
 
   getPos() {
     console.log('Pos returning ', this.compositeBuffer.length + this.position);
-    return this.compositeBuffer.length + this.position;
+    return {
+      compositeBufferLen: this.compositeBuffer.length,
+      offset: this.position
+    };
+    // return this.compositeBuffer.length + this.position;
   }
 
   getLen() {
