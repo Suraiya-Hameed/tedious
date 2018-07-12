@@ -204,7 +204,7 @@ module.exports.Login7Payload = class Login7Payload {
     this.addVariableDataString(variableData, this.loginData.appName);
     this.addVariableDataString(variableData, this.loginData.serverName);
     let extensionPosObj = {};
-    console.log('Pos fedAuthLogin7Required:', variableData.data.position);
+    // console.log('Pos fedAuthLogin7Required:', variableData.data.position);
     if (this.fedAuthLogin7Required) {
       // hold the position at which the FeaturExt offset is going to be written. We write 0 in the placeholder till the offset is available.
       extensionPosObj = this.addVariableDataInt32LE(variableData, 0);
@@ -212,7 +212,7 @@ module.exports.Login7Payload = class Login7Payload {
       this.addVariableDataString(variableData, '');
     }
 
-    console.log('Pos libName:', variableData.data.position);
+    // console.log('Pos libName:', variableData.data.position);
     this.addVariableDataString(variableData, this.libraryName);
     this.addVariableDataString(variableData, this.loginData.language);
     this.addVariableDataString(variableData, this.loginData.database);
@@ -241,8 +241,8 @@ module.exports.Login7Payload = class Login7Payload {
     }
 
     if (this.fedAuthLogin7Required) {
-      console.log('writing offset ', extensionPosObj);
-      console.log('writing at position ', variableData.data.position);
+      // console.log('writing offset ', extensionPosObj);
+      // console.log('writing at position ', variableData.data.position);
       variableData.data.writeUInt32LEatOffset(variableData.offset, extensionPosObj);
       return Buffer.concat([variableData.offsetsAndLengths.data, variableData.data.data, this.featureExt ]);
     }
@@ -273,22 +273,22 @@ module.exports.Login7Payload = class Login7Payload {
     value || (value = '');
     variableData.offsetsAndLengths.writeUInt16LE(variableData.offset);
     variableData.offsetsAndLengths.writeUInt16LE(value.length);
-    console.log('in variableData.data adding string ', variableData.data.position);
+    // console.log('in variableData.data adding string ', variableData.data.position);
     variableData.data.writeString(value);
-    console.log('out variableData.data adding string ', variableData.data.position);
+    // console.log('out variableData.data adding string ', variableData.data.position);
     return variableData.offset += value.length * 2;
   }
 
   addVariableDataInt32LE(variableData, value) {
     variableData.offsetsAndLengths.writeUInt16LE(variableData.offset);
     variableData.offsetsAndLengths.writeUInt16LE(4);
-    console.log('Pos :', variableData.data.position, '|value ', value);
+    // console.log('Pos :', variableData.data.position, '|value ', value);
     // position at which the int value is written
     // const position = variableData.data.position;
     const positionObj = variableData.data.getPos();
-    console.log('position :', variableData.offsetsAndLengths.position/* , ' | ', position, ' | ', variableData.data.position */);
+    // console.log('position :', variableData.offsetsAndLengths.position/* , ' | ', position, ' | ', variableData.data.position */);
     variableData.data.writeUInt32LE(value);
-    console.log('Pos :', variableData.data.position);
+    // console.log('Pos :', variableData.data.position);
     variableData.offset += 4;
     return positionObj;
   }
