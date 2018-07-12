@@ -72,6 +72,7 @@
   },
   "scripts": {
     "lint": "eslint src test && flow",
+    "test-aad": "nodeunit test/setup.js test/integration/connection-retry-test.js",
     "test": "nodeunit --reporter minimal test/setup.js test/unit/ test/unit/token/ test/unit/tracking-buffer",
     "test-integration": "nodeunit --reporter minimal test/setup.js test/integration/",
     "test-all": "nodeunit --reporter minimal test/setup.js test/unit/ test/unit/token/ test/unit/tracking-buffer test/integration/",
