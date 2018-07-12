@@ -9,8 +9,8 @@ const config = JSON.parse(
 
 config.options.debug = {
   packet: true,
-  data: true,
-  payload: true,
+  // data: true,
+  // payload: true,
   token: true,
   log: true
 };
@@ -23,7 +23,7 @@ exports.insertBinary = function(test) {
     test.done();
   });
 
-  // connection.on('debug', (log) => console.log('-- ', log));
+  connection.on('debug', (log) => console.log('-- ', log));
   connection.on('connect', function(err) {
     test.ifError(err);
 
