@@ -220,7 +220,7 @@ module.exports = class WritableTrackingBuffer {
 
     const length = Buffer.byteLength(value, encoding);
     this.makeRoomFor(length);
-    console.log('this.buffer ', this.buffer.toString('hex'));
+    // console.log('this.buffer ', this.buffer.toString('hex'));
     // $FlowFixMe https://github.com/facebook/flow/pull/5398
     this.buffer.write(value, this.position, encoding);
     this.position += length;
