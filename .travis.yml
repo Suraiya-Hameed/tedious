@@ -75,7 +75,7 @@ jobs:
           }
         }' > ~/.tedious/test-connection.json
       before_script: skip
-      script: nodeunit test/setup.js integration/connection-retry-test.js
+      script: nodeunit ./test/setup.js ./integration/connection-retry-test.js
 
     - stage: release
       node_js: 8
