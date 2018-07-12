@@ -84,28 +84,21 @@ module.exports = class WritableTrackingBuffer {
 
   writeUInt32LEatOffset(value: number, offsetObj) {
     console.log('writeUInt32LEatOffset: compositeBuffer len  ' + this.compositeBuffer.length);
-    if (this.compositeBuffer.length === 0) {
+    if (offsetObj.compositeBufferLen === 0 && this.compositeBuffer.length !== 0) {
       console.log('condition 1');
-      this.buffer.writeUInt32LE(value, offsetObj.offset);
-    } else if (offsetObj.compositeBufferLen === 0 && this.compositeBuffer.length !== 0) {
-      console.log('condition 2');
       this.compositeBuffer.writeUInt32LE(value, offsetObj.offset);
-    } else if ((offsetObj.compositeBufferLen + offsetObj.offset) < this.compositeBuffer.length) {
+    }
+    else if (this.compositeBuffer.length === 0) {
+      console.log('condition 2');
+      this.buffer.writeUInt32LE(value, offsetObj.offset);
+    } else if ((offsetObj.compositeBufferLen - 1 + offsetObj.offset) < this.compositeBuffer.length) {
       console.log('condition 3');
-      this.compositeBuffer.writeUInt32LE(value, offsetObj.compositeBufferLen + offsetObj.offset);
+      this.compositeBuffer.writeUInt32LE(value, offsetObj.compositeBufferLen - 1 + offsetObj.offset);
     }
     else if ((offsetObj.compositeBufferLen + offsetObj.offset) > this.compositeBuffer.length) {
       console.log('condition 4');
       this.compositeBuffer.writeUInt32LE(value, offsetObj.offset);
     }
-    // if (offset < this.compositeBuffer.length) {
-    //   console.log('writeUInt32LEatOffset: compositeBuffer len  ' + this.compositeBuffer.length);
-    //   this.compositeBuffer.writeUInt32LE(value, offset);
-    // }
-    // else {
-    //   console.log('writeUInt32LEatOffset: buffer len  ' + this.buffer.length);
-    //   this.buffer.writeUInt32LE(value, offset);
-    // }
   }
 
   getPos() {
