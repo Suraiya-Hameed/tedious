@@ -32,6 +32,9 @@ before_test:
   - mkdir C:\Users\appveyor\.tedious
   - ps: $port = $ipall.IPAddressProperties.Item("TcpDynamicPorts").Value;
   - ps: >-
+      $wmi = New-Object('Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer');
+      $ipall = $wmi.GetSmoObject("ManagedComputer[@Name='${env:computername}']/ServerInstance[@Name='${instancename}']/ServerProtocol[@Name='Tcp']/IPAddress[@Name='IPAll']");
+      $port = $ipall.IPAddressProperties.Item("TcpDynamicPorts").Value;
       Set-Content -Value '{
         "config": {
           "server": "localhost",
