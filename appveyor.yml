@@ -35,7 +35,7 @@ before_test:
         "config": {
           "server": "localhost",
           "userName": "sa",
-          "password": "yourStrong(!)Password",
+          "password": "Password12!",
           "options": {
             "database": "master",
             "instanceName": "SQL2017"
