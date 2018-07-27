@@ -30,7 +30,7 @@ before_test:
   - net start sqlbrowser
 
   - mkdir C:\Users\appveyor\.tedious
-  - echo '{
+  - ps: Set-Content -Value '{
       "config": {
         "server": "localhost",
         "userName": "sa",
@@ -40,7 +40,7 @@ before_test:
           "database": "master"
         }
       }
-    }' > C:\Users\appveyor\.tedious\test-connection.json
+    }' -Path C:\Users\appveyor\.tedious\test-connection.json
 
 test_script:
   - node --version
