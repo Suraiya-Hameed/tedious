@@ -31,17 +31,15 @@ before_test:
 
   - mkdir C:\Users\appveyor\.tedious
   - ps: >-
-      $instancename = SQL2017
-      $wmi = New-Object('Microsoft.SqlServer.Management.Smo.Wmi.ManagedComputer');
-      $ipall = $wmi.GetSmoObject("ManagedComputer[@Name='${env:computername}']/ServerInstance[@Name='${instancename}']/ServerProtocol[@Name='Tcp']/IPAddress[@Name='IPAll']");
-      $port = $ipall.IPAddressProperties.Item("TcpDynamicPorts").Value;
+      $instancename = SQL2017;
       Set-Content -Value '{
         "config": {
           "server": "localhost",
           "userName": "sa",
           "password": "yourStrong(!)Password",
           "options": {
-            "database": "master"
+            "database": "master",
+            "instanceName": $instancename
             }
             }
             }' -Path C:\Users\appveyor\.tedious\test-connection.json
