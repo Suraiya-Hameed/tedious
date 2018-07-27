@@ -30,17 +30,18 @@ before_test:
   - net start sqlbrowser
 
   - mkdir C:\Users\appveyor\.tedious
-  - ps: Set-Content -Value '{
-      "config": {
-        "server": "localhost",
-        "userName": "sa",
-        "password": "yourStrong(!)Password",
-        "options": {
-          "port": 1433,
-          "database": "master"
-        }
-      }
-    }' -Path C:\Users\appveyor\.tedious\test-connection.json
+  - ps: >-
+      Set-Content -Value '{
+        "config": {
+          "server": "localhost",
+          "userName": "sa",
+          "password": "yourStrong(!)Password",
+          "options": {
+            "port": 1433,
+            "database": "master"
+            }
+            }
+            }' -Path C:\Users\appveyor\.tedious\test-connection.json
 
 test_script:
   - node --version
