@@ -30,6 +30,7 @@ before_test:
   - net start sqlbrowser
 
   - mkdir C:\Users\appveyor\.tedious
+  - ps: $port = $ipall.IPAddressProperties.Item("TcpDynamicPorts").Value;
   - ps: >-
       Set-Content -Value '{
         "config": {
@@ -37,7 +38,7 @@ before_test:
           "userName": "sa",
           "password": "yourStrong(!)Password",
           "options": {
-            "port": 1433,
+            "port": [int]$port,
             "database": "master"
             }
             }
