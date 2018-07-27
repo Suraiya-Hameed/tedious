@@ -31,7 +31,6 @@ before_test:
 
   - mkdir C:\Users\appveyor\.tedious
   - ps: >-
-      $instancename = SQL2017;
       Set-Content -Value '{
         "config": {
           "server": "localhost",
@@ -39,7 +38,7 @@ before_test:
           "password": "yourStrong(!)Password",
           "options": {
             "database": "master",
-            "instanceName": $instancename
+            "instanceName": "SQL2017"
             }
             }
             }' -Path C:\Users\appveyor\.tedious\test-connection.json
