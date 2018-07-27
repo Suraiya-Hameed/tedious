@@ -37,8 +37,7 @@ before_test:
           "userName": "sa",
           "password": "Password12!",
           "options": {
-            "database": "master",
-            "instanceName": "SQL2017"
+            "database": "master"
             }
             }
             }' -Path C:\Users\appveyor\.tedious\test-connection.json
